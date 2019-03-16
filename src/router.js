@@ -4,7 +4,18 @@ const {query} = require('./model')
 
 router.route('/books')
 .get((req,res,next)=>{
-  res.send('get book')
+  let hasil = null
+  query((db,resolve,reject)=>{
+    db.all('SELECT * from book',[],(err,rows)=>{
+      if(err)
+        throw reject('fail')
+      resolve('success')
+      hasil = rows
+      console.log(hasil);
+            
+      res.render('books',{title:'Books Page',books:hasil})
+    })
+  })
 })
 .post((req,res,next)=>{
   res.send('post book')
@@ -17,7 +28,7 @@ router.route('/books')
 })
 
 router.get('/',(req,res)=>{
-  res.render('index',{title:'Simple Crud with Express'})
+  res.render('index',{title:'Simple Crud with Express',desc:'Crud app using express, handlebars & sqlite. made by @naufalafif58'})
 })
 
 module.exports = router;
