@@ -28,7 +28,7 @@ router.route('/books/crud')
     db.run(insert_query,[],function(err){
       if(err){
         reject(`fail, message : ${err.message}`)
-        res.send({action:false})
+        res.send({action:false,message:err.message})
       }else{
         resolve('success')
         let message = `A row has been inserted with rowid ${this.lastID}`

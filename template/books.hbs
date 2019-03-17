@@ -22,7 +22,8 @@
             <th scope="col">Title</th>
             <th scope="col">Desc</th>
             <th scope="col">Release Date</th>
-            <th scope="col" colspan="2">Publisher</th>
+            <th scope="col">Publisher</th>
+            <th scope="col">#</th>
           </tr>
         </thead>
         <tbody id="table_body">
@@ -44,20 +45,26 @@
   <script>
     const url_origin = `${window.location.origin}/books/crud`;
 
+    function generateRow(row){
+      let data = `
+            <tr>
+              <td>${row.book_title}</td>
+              <td>${row.book_desc}</td>
+              <td>${row.release_date}</td>
+              <td>${row.publisher }</td>
+              <td></td>
+            </tr>
+            `
+      return data;
+    }
+
     function fetchData() {
       $('#table_body').html('');
       axios.get(url_origin).then((res) => {
         let rows = res.data
         rows.forEach(row => {
           $('#table_body').append(
-            `
-            <tr>
-              <td>${row.book_title}</td>
-              <td>${row.book_desc}</td>
-              <td>${row.release_date}</td>
-              <td>${row.publisher }</td>
-            </tr>
-            `
+            generateRow(row)
           )
         })
       })
@@ -84,7 +91,9 @@
       if (validate(dataToSave)) {
         axios.post(url_origin,dataToSave).then((res)=>{
           if(res.data.action){
-            fetchData()
+            $('#table_body').append(
+              generateRow({book_title:title,book_desc:desc,release_date:release_date,publisher:publisher})
+            )
             cleanForm()
           }
           else
