@@ -14,6 +14,7 @@ const PARTIALS_DIRECTORY_PATH = path.join(__dirname,'../template/partials')
 // General Settings
 app.use(express.static(PUBLIC_DIRECTORY_PATH))
 app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json());  
 
 // View Template Engine Settings
 app.set('view engine','hbs')

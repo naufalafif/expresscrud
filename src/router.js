@@ -7,18 +7,38 @@ router.route('/books/crud')
   let hasil = null
   query((db,resolve,reject)=>{
     db.all('SELECT * from book',[],(err,rows)=>{
-      if(err)
-        throw reject('fail')
-      resolve('success')
-      hasil = rows            
-      res.send(hasil)
+      if(err){
+        reject(`fail, message : ${err.message}`)
+        res.send([])
+      }else{
+        resolve('success')
+        hasil = rows            
+        res.send(hasil)
+      }
     })
   })
 })
 .post((req,res,next)=>{
-  res.send('post book')
+  console.log(req.body)
+  const {title,desc,release_date,publisher} = req.body
+  const insert_query = `INSERT INTO book (book_title,book_desc,release_date,publisher) VALUES ("${title}","${desc}","${release_date}","${publisher}")`
+  console.log(insert_query);
+  
+  query((db,resolve,reject)=>{
+    db.run(insert_query,[],function(err){
+      if(err){
+        reject(`fail, message : ${err.message}`)
+        res.send({action:false})
+      }else{
+        resolve('success')
+        let message = `A row has been inserted with rowid ${this.lastID}`
+        res.send({action:true,message})
+        console.log(message)
+      }
+    })
+  })
 })
-.put((req,res,next)=>{
+.put((req,res,next)=>{  
   res.send('put book')
 })
 .delete((req,res,next)=>{

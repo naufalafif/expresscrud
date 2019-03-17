@@ -45,6 +45,7 @@
     const url_origin = `${window.location.origin}/books/crud`;
 
     function fetchData() {
+      $('#table_body').html('');
       axios.get(url_origin).then((res) => {
         let rows = res.data
         rows.forEach(row => {
@@ -63,7 +64,12 @@
     }
 
     fetchData();
-
+    function cleanForm(){
+      $('#title').val('')
+      $('#desc').val('')
+      $('#release_date').val('')
+      $('#publisher').val('')
+    }
     function save_row() {
       let title = document.querySelector('#title').value;
       let desc = document.querySelector('#desc').value;
@@ -75,7 +81,16 @@
         release_date,
         publisher
       }
-      if (validate(dataToSave)) {} else {
+      if (validate(dataToSave)) {
+        axios.post(url_origin,dataToSave).then((res)=>{
+          if(res.data.action){
+            fetchData()
+            cleanForm()
+          }
+          else
+            console.log('Fail To Save Data')
+        })
+      } else {
         alert('U Need to Complete Form First')
       }
     }
