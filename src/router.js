@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router();
 const {query} = require('./model')
 
-router.route('/books')
+router.route('/books/crud')
 .get((req,res,next)=>{
   let hasil = null
   query((db,resolve,reject)=>{
@@ -10,10 +10,8 @@ router.route('/books')
       if(err)
         throw reject('fail')
       resolve('success')
-      hasil = rows
-      console.log(hasil);
-            
-      res.render('books',{title:'Books Page',books:hasil})
+      hasil = rows            
+      res.send(hasil)
     })
   })
 })
@@ -27,8 +25,13 @@ router.route('/books')
   res.send('delete book')
 })
 
+router.get('/books',(req,res)=>{
+  res.render('books',{title:'Books Page'})
+})
+
 router.get('/',(req,res)=>{
   res.render('index',{title:'Simple Crud with Express',desc:'Crud app using express, handlebars & sqlite. made by @naufalafif58'})
 })
+
 
 module.exports = router;

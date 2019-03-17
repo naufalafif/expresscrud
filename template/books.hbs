@@ -1,40 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>{{title}}</title>
   {{>head}}
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
+
 <body>
   <div class="container">
-  {{>header}}
+    {{>header}}
 
-  <div class="content">
-    <table class="table">
-      <thead class="thead-dark">
+    <div class="content">
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Desc</th>
+            <th scope="col">Release Date</th>
+            <th scope="col" colspan="2">Publisher</th>
+          </tr>
+        </thead>
+        <tbody id="table_body">
+        </tbody>
         <tr>
-          <th scope="col">Title</th>
-          <th scope="col">Desc</th>
-          <th scope="col">Release Date</th>
-          <th scope="col">Publisher</th>
+          <td><input type="text" id="title" placeholder="Title"></td>
+          <td><input type="text" id="desc" placeholder="Desc"></td>
+          <td><input type="text" id="release_date" placeholder="Release Date"></td>
+          <td><input type="text" id="publisher" placeholder="Publisher"></td>
+          <td><button class="btn btn-dark btn-sm" onclick="save_row()">save row</button></td>
         </tr>
-      </thead>
-      <tbody>
-        {{#books}}
+
+      </table>
+    </div>
+
+    {{>footer}}
+  </div>
+
+  <script>
+    const url_origin = `${window.location.origin}/books/crud`;
+
+    function fetchData() {
+      axios.get(url_origin).then((res) => {
+        let rows = res.data
+        rows.forEach(row => {
+          $('#table_body').append(
+            `
             <tr>
-              <td>{{book_title}}</td>
-              <td>{{book_desc}}</td>
-              <td>{{release_date}}</td>
-              <td>{{publisher}}</td>
+              <td>${row.book_title}</td>
+              <td>${row.book_desc}</td>
+              <td>${row.release_date}</td>
+              <td>${row.publisher }</td>
             </tr>
-        {{/books}}
-      </tbody>
-    </table>
-  </div>
-  
-  {{>footer}}
-  </div>
+            `
+          )
+        })
+      })
+    }
+
+    fetchData();
+
+    function save_row() {
+      let title = document.querySelector('#title').value;
+      let desc = document.querySelector('#desc').value;
+      let release_date = document.querySelector('#release_date').value;
+      let publisher = document.querySelector('#publisher').value;
+      let dataToSave = {
+        title,
+        desc,
+        release_date,
+        publisher
+      }
+      if (validate(dataToSave)) {} else {
+        alert('U Need to Complete Form First')
+      }
+    }
+
+    function validate(dataToSave) {
+      let dataToSave_values = Object.values(dataToSave)
+      console.log(dataToSave_values)
+      let existEmpty = dataToSave_values.includes("")
+      return !existEmpty
+    }
+  </script>
 </body>
+
 </html>
