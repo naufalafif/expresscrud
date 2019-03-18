@@ -7,7 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>{{title}}</title>
   {{>head}}
-
+  <style>
+    .book-save{
+      display: none;
+    }
+  </style>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
@@ -15,7 +19,7 @@
   <div class="container">
     {{>header}}
 
-    <div class="content">
+    <div class="content" style="margin-bottom:80px">
       <table class="table">
         <thead class="thead-dark">
           <tr>
@@ -44,30 +48,101 @@
 
   <script>
     const url_origin = `${window.location.origin}/books/crud`;
-
+    let BOOKS_DATA = []
+    let EDIT_STATUS = false;
     function generateRow(row){
       let data = `
-            <tr>
+            <tr id="${row.book_id}">
               <td>${row.book_title}</td>
               <td>${row.book_desc}</td>
               <td>${row.release_date}</td>
               <td>${row.publisher }</td>
-              <td></td>
+              <td>
+                <div class="btn-group" role="group" aria-label="Basic example">
+                  <button class="btn btn-primary btn-sm btn-hapus" onclick="editRow('${row.book_id}')" >edit</button>
+                  <button class="btn btn-danger btn-sm btn-edit" onclick="deleteRow('${row.book_id}')" >delete</button>
+                </div>
+              </td>
+              
             </tr>
             `
       return data;
     }
 
     function fetchData() {
+      EDIT_STATUS = false
       $('#table_body').html('');
       axios.get(url_origin).then((res) => {
         let rows = res.data
+        BOOKS_DATA = res.data
         rows.forEach(row => {
           $('#table_body').append(
             generateRow(row)
           )
         })
       })
+    }
+    
+
+    function deleteRow(book_id){
+      alert(`deleting ${book_id}`)
+      let url = `${url_origin}/${book_id}`
+      axios.delete(url).then((res)=>{
+        if(res.data.action)
+          fetchData()
+        else
+          alert('fail to delete data')
+      })  
+    }
+
+    function editRow(book_id){
+      if(EDIT_STATUS){
+        alert('Please Finish Ur Editing First')
+        return;
+      }
+      EDIT_STATUS = true;
+      let current_row = BOOKS_DATA.filter(i=>i.book_id==book_id)
+      if(current_row.length){
+        current_row = current_row[0]
+        $(`#${book_id}`).html(`
+                        <td><input type="text" id="update_book_title" value="${current_row.book_title}"></td>
+                        <td><input type="text" id="update_book_desc" value="${current_row.book_desc}"></td>
+                        <td><input type="text" id="update_release_date" value="${current_row.release_date}"></td>
+                        <td><input type="text" id="update_publisher" value="${current_row.publisher}"></td>
+                        <td>
+                          <div class="btn-group" role="group" aria-label="Basic example">
+                            <button class="btn btn-primary btn-sm" onclick="doEditRow('${current_row.book_id}')" >save</button>
+                            <button class="btn btn-warning btn-sm" onclick="fetchData()" >cancel</button>
+                          </div>
+                        </td>
+                        
+                    
+        `)
+
+      }
+    }
+    
+    function doEditRow(book_id){
+      let book_title = $('#update_book_title').val()
+      let book_desc = $('#update_book_desc').val()
+      let release_date = $('#update_release_date').val()
+      let publisher = $('#update_publisher').val()
+
+      let dataToUpdate = {
+        book_id,
+        book_title,
+        book_desc,
+        release_date,
+        publisher   
+      }
+
+      axios.put(url_origin,dataToUpdate).then((res)=>{
+        if(res.data.action)
+          fetchData()
+        else
+          alert('fail to update data')
+      })  
+      
     }
 
     fetchData();
@@ -91,13 +166,11 @@
       if (validate(dataToSave)) {
         axios.post(url_origin,dataToSave).then((res)=>{
           if(res.data.action){
-            $('#table_body').append(
-              generateRow({book_title:title,book_desc:desc,release_date:release_date,publisher:publisher})
-            )
+            fetchData()
             cleanForm()
           }
           else
-            console.log('Fail To Save Data')
+            alert('Fail To Save Data')
         })
       } else {
         alert('U Need to Complete Form First')
@@ -106,7 +179,6 @@
 
     function validate(dataToSave) {
       let dataToSave_values = Object.values(dataToSave)
-      console.log(dataToSave_values)
       let existEmpty = dataToSave_values.includes("")
       return !existEmpty
     }
